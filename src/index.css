@@ -1,0 +1,229 @@
+@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+/* Tailwind import removed: this project isn't configured with Tailwind/PostCSS.
+  If you want Tailwind, install and configure it (tailwindcss, postcss) and
+  restore or replace this import with the proper directives. */
+
+@theme {
+  --font-sans: "Hanken Grotesk", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  --color-adm-bg: #F0F7F7;
+  --color-adm-primary: #002046;
+  --color-adm-secondary: #006a63;
+  --color-adm-secondary-light: rgba(139, 241, 230, 0.2); /* secondary container light */
+  --color-adm-on-bg: #0e1c2e;
+  --color-adm-surface: #ffffff;
+  --color-adm-dark: #233144;
+}
+
+body {
+  background-color: #F0F7F7;
+  font-family: "Hanken Grotesk", "Inter", sans-serif;
+  color: #0e1c2e;
+  overflow-x: hidden;
+}
+
+/* Basic layout helpers to replace Tailwind utilities used previously */
+.app-root {
+  min-height: 100vh;
+  background-color: var(--color-adm-bg);
+}
+
+.app-main {
+  padding-left: 260px; /* account for fixed sidebar width */
+  padding-top: 64px; /* header height space */
+  min-height: 100vh;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-container {
+  flex: 1 1 auto;
+  padding: 2rem;
+  max-width: 1536px;
+  width: 100%;
+  margin: 0 auto;
+  padding-bottom: 4rem;
+}
+
+.login-screen {
+  min-height: 100vh;
+  background:
+    linear-gradient(135deg, rgba(0, 32, 70, 0.92), rgba(0, 106, 99, 0.84)),
+    url('./assets/hero.png') center/cover no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.login-panel {
+  width: min(100%, 460px);
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 28px;
+  box-shadow: 0 24px 80px rgba(0, 20, 45, 0.28);
+  padding: 2rem;
+}
+
+.login-panel__brand {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.login-panel__logo {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  background: #002046;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 12px 28px rgba(0, 32, 70, 0.22);
+}
+
+.login-panel__eyebrow {
+  margin: 0 0 0.25rem;
+  color: #006a63;
+  font-weight: 800;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.login-panel__title {
+  margin: 0;
+  color: #002046;
+  font-size: 1.8rem;
+  line-height: 1.1;
+  font-weight: 900;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.login-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.login-form__field label {
+  color: #475569;
+  font-weight: 800;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+.login-form__field input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #dbe3ee;
+  border-radius: 16px;
+  padding: 0.95rem 1rem;
+  color: #0e1c2e;
+  font: inherit;
+  font-weight: 700;
+  outline: none;
+  background: #f8fafc;
+}
+
+.login-form__field input:focus {
+  border-color: #006a63;
+  box-shadow: 0 0 0 4px rgba(0, 106, 99, 0.12);
+  background: #ffffff;
+}
+
+.login-form__password {
+  position: relative;
+}
+
+.login-form__password input {
+  padding-right: 3.25rem;
+}
+
+.login-form__password button {
+  position: absolute;
+  right: 0.6rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.login-form__password button:hover {
+  background: #eef2f7;
+  color: #002046;
+}
+
+.login-form__error {
+  margin: 0;
+  border: 1px solid #fecdd3;
+  background: #fff1f2;
+  color: #be123c;
+  border-radius: 14px;
+  padding: 0.8rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.login-form__submit {
+  margin-top: 0.5rem;
+  border: 0;
+  border-radius: 16px;
+  background: #002046;
+  color: white;
+  font: inherit;
+  font-weight: 900;
+  padding: 1rem 1.2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  cursor: pointer;
+  box-shadow: 0 16px 34px rgba(0, 32, 70, 0.24);
+}
+
+.login-form__submit:hover {
+  filter: brightness(1.08);
+}
+
+.login-form__submit:disabled {
+  cursor: wait;
+  opacity: 0.72;
+  filter: none;
+}
+
+/* Custom Scrollbar Styles for beautiful dashboard tables */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
