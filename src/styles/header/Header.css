@@ -1,0 +1,238 @@
+.admin-header {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: calc(100% - 260px);
+  height: 64px;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 32px;
+  z-index: 60;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+}
+
+.admin-header__search-shell {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+  max-width: 28rem;
+}
+
+.admin-header__search-group {
+  position: relative;
+  width: 100%;
+}
+
+.admin-header__search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: #94a3b8;
+  transition: color 0.2s ease;
+}
+
+.admin-header__search-group:focus-within .admin-header__search-icon {
+  color: #047857;
+}
+
+.admin-header__search-input {
+  width: 100%;
+  background: #f8fafc;
+  color: #1e293b;
+  font-size: 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 9999px;
+  padding: 8px 16px 8px 44px;
+  outline: none;
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-header__search-input:hover {
+  background: #f1f5f9;
+}
+
+.admin-header__search-input:focus {
+  background: #ffffff;
+  border-color: #047857;
+  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2);
+}
+
+.admin-header__search-clear {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.admin-header__search-clear:hover {
+  color: #475569;
+}
+
+.admin-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-header__notification-shell {
+  position: relative;
+}
+
+.admin-header__icon-button {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  color: #475569;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.admin-header__icon-button:hover {
+  background: #f1f5f9;
+}
+
+.admin-header__icon-button--relative {
+  position: relative;
+}
+
+.admin-header__badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 16px;
+  height: 16px;
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #ffffff;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.admin-header__notifications-panel {
+  position: absolute;
+  right: 0;
+  margin-top: 8px;
+  width: 320px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.1), 0 10px 10px -5px rgba(15, 23, 42, 0.04);
+  padding: 12px 0;
+  z-index: 50;
+}
+
+.admin-header__notifications-head {
+  padding: 0 16px 8px;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.admin-header__notifications-title {
+  font-weight: 700;
+  color: #1e293b;
+  font-size: 14px;
+}
+
+.admin-header__notifications-clear {
+  color: #047857;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.admin-header__notifications-clear:hover {
+  text-decoration: underline;
+}
+
+.admin-header__notifications-list {
+  max-height: 256px;
+  overflow-y: auto;
+  padding: 4px 4px;
+}
+
+.admin-header__notification-item {
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: #334155;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.admin-header__notification-item:hover {
+  background: #f8fafc;
+}
+
+.admin-header__notification-item-title {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.admin-header__notification-item-text {
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.admin-header__notifications-empty {
+  padding: 32px 0;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.admin-header__divider {
+  width: 1px;
+  height: 24px;
+  background: #e2e8f0;
+  margin: 0 4px;
+}
+
+.admin-header__role-shell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-left: 8px;
+}
+
+.admin-header__role-badge {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #d1fae5;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+}
+
+.admin-header__role-text {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
