@@ -16,8 +16,11 @@ import {
 } from 'lucide-react';
 import {
   AdminUserDetailDto,
+  AdminUserCreateRequest,
   AdminUserRowDto,
   AdminUserSummaryDto,
+  UserResponseDto,
+  createAdminUser,
   getAdminUserById,
   getAdminUsers,
   getAdminUsersSummary,
@@ -52,6 +55,15 @@ const statusLabel: Record<string, string> = {
 
 const roleOptions = ['ADMIN', 'CUSTOMER', 'CONSULTANT'];
 const toneOptions = ['GENTLE', 'NORMAL', 'AGGRESSIVE'];
+
+const emptyCreateUserDraft: AdminUserCreateRequest = {
+  email: '',
+  passwordHash: '',
+  fullName: '',
+  tonePreference: 'NORMAL',
+  status: 'ACTIVE',
+  role: 'CUSTOMER'
+};
 
 function formatDate(value: string | null | undefined) {
   if (!value) return 'Chưa có';
@@ -99,6 +111,20 @@ function toLocalUser(row: AdminUserRowDto): User {
   };
 }
 
+function createdUserToAdminRow(user: UserResponseDto): AdminUserRowDto {
+  return {
+    id: user.id,
+    email: user.email,
+    fullName: user.fullName,
+    tonePreference: user.tonePreference,
+    status: user.status,
+    role: user.role,
+    currentPlanName: null,
+    planExpiresAt: null,
+    createdAt: user.createdAt
+  };
+}
+
 export default function UserManagement({ searchTerm = '', onUpdateUser }: UserManagementProps) {
   const [rows, setRows] = useState<AdminUserRowDto[]>([]);
   const [summary, setSummary] = useState<AdminUserSummaryDto>(emptySummary);
@@ -112,6 +138,8 @@ export default function UserManagement({ searchTerm = '', onUpdateUser }: UserMa
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [editingUser, setEditingUser] = useState<AdminUserRowDto | null>(null);
+  const [creatingUser, setCreatingUser] = useState(false);
+  const [createDraft, setCreateDraft] = useState<AdminUserCreateRequest>(emptyCreateUserDraft);
   const [detailData, setDetailData] = useState<AdminUserDetailDto | null>(null);
 
   const loadUsers = useCallback(async () => {
@@ -175,6 +203,26 @@ export default function UserManagement({ searchTerm = '', onUpdateUser }: UserMa
       setNotice('Đã cập nhật thông tin người dùng.');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Cập nhật người dùng thất bại');
+    }
+  };
+
+  const submitCreate = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setError('');
+    setNotice('');
+
+    try {
+      const created = await createAdminUser(createDraft);
+      const row = createdUserToAdminRow(created);
+      setRows((current) => [row, ...current]);
+      setTotalElements((current) => current + 1);
+      await loadSummary();
+      onUpdateUser?.(toLocalUser(row));
+      setCreateDraft(emptyCreateUserDraft);
+      setCreatingUser(false);
+      setNotice('Đã tạo người dùng mới.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Tạo người dùng thất bại');
     }
   };
 
@@ -276,7 +324,7 @@ export default function UserManagement({ searchTerm = '', onUpdateUser }: UserMa
               <option value="Premium">Premium</option>
             </select>
 
-            <button type="button" className="user-management__add-button" onClick={() => setNotice('Backend chưa có endpoint tạo user.')}>
+            <button type="button" className="user-management__add-button" onClick={() => setCreatingUser(true)}>
               <Plus />
               <span>Thêm người quản trị</span>
             </button>
@@ -408,6 +456,64 @@ export default function UserManagement({ searchTerm = '', onUpdateUser }: UserMa
               <div className="user-management__form-actions">
                 <button type="button" onClick={() => setEditingUser(null)}>Hủy</button>
                 <button type="submit">Cập nhật</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {creatingUser && (
+        <div className="user-management__modal-backdrop">
+          <div className="user-management__modal user-management__modal--sm">
+            <div className="user-management__modal-header">
+              <h3>Thêm người dùng</h3>
+              <button onClick={() => setCreatingUser(false)}><X /></button>
+            </div>
+
+            <form onSubmit={submitCreate} className="user-management__form">
+              <label>
+                Họ và tên
+                <input value={createDraft.fullName} onChange={(event) => setCreateDraft({ ...createDraft, fullName: event.target.value })} required />
+              </label>
+
+              <label>
+                Email
+                <input type="email" value={createDraft.email} onChange={(event) => setCreateDraft({ ...createDraft, email: event.target.value })} required />
+              </label>
+
+              <label>
+                Mật khẩu
+                <input type="password" value={createDraft.passwordHash} onChange={(event) => setCreateDraft({ ...createDraft, passwordHash: event.target.value })} minLength={8} required />
+              </label>
+
+              <div className="user-management__form-grid">
+                <label>
+                  Trạng thái
+                  <select value={createDraft.status} onChange={(event) => setCreateDraft({ ...createDraft, status: event.target.value })}>
+                    <option value="ACTIVE">ACTIVE</option>
+                    <option value="PENDING">PENDING</option>
+                    <option value="SUSPENDED">SUSPENDED</option>
+                  </select>
+                </label>
+
+                <label>
+                  Vai trò
+                  <select value={createDraft.role} onChange={(event) => setCreateDraft({ ...createDraft, role: event.target.value })}>
+                    {roleOptions.map((role) => <option key={role} value={role}>{role}</option>)}
+                  </select>
+                </label>
+              </div>
+
+              <label>
+                Tone preference
+                <select value={createDraft.tonePreference} onChange={(event) => setCreateDraft({ ...createDraft, tonePreference: event.target.value })}>
+                  {toneOptions.map((tone) => <option key={tone} value={tone}>{tone}</option>)}
+                </select>
+              </label>
+
+              <div className="user-management__form-actions">
+                <button type="button" onClick={() => setCreatingUser(false)}>Hủy</button>
+                <button type="submit">Tạo người dùng</button>
               </div>
             </form>
           </div>

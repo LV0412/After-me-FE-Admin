@@ -156,15 +156,56 @@
   padding: 24px 22px 18px;
 }
 
+.reminder-tracking__chart-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.reminder-tracking__chart-actions select {
+  border: 1px solid #d7e3ef;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 850;
+  padding: 8px 10px;
+}
+
 .reminder-tracking__chart-item {
   height: 100%;
-  min-width: 30px;
+  min-width: 12px;
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
+  position: relative;
+}
+
+.reminder-tracking__chart-tooltip {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translate(-50%, 4px) scale(0.95);
+  opacity: 0;
+  z-index: 5;
+  border-radius: 8px;
+  background: #002046;
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 900;
+  padding: 5px 9px;
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: 0 12px 20px rgba(15, 23, 42, 0.16);
+  transition: opacity 150ms ease, transform 150ms ease;
+}
+
+.reminder-tracking__chart-item:hover .reminder-tracking__chart-tooltip {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1);
 }
 
 .reminder-tracking__chart-bar {

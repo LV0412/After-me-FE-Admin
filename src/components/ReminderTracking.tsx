@@ -28,6 +28,7 @@ import {
   updateReminderStatus
 } from '../api/adminApi';
 import { Reminder } from '../types';
+import { groupTimeSeries, intervalOptions, type IntervalValue } from '../utils/timeSeries';
 import '../styles/ReminderTracking.css';
 
 interface ReminderTrackingProps {
@@ -117,6 +118,7 @@ export default function ReminderTracking({ searchTerm }: ReminderTrackingProps) 
   const [actionLoading, setActionLoading] = useState(false);
   const [detail, setDetail] = useState<ReminderRowDto | null>(null);
   const [notice, setNotice] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [chartInterval, setChartInterval] = useState<IntervalValue>('DAY');
 
   const loadReminders = async () => {
     setLoading(true);
@@ -131,7 +133,7 @@ export default function ReminderTracking({ searchTerm }: ReminderTrackingProps) 
           status: statusFilter === 'All' ? undefined : statusFilter
         }),
         getReminderSummary(),
-        getReminderTimeseries({ interval: 'DAY' }),
+        getReminderTimeseries({ interval: chartInterval }),
         getReminderExecutionStats()
       ]);
 
@@ -159,13 +161,14 @@ export default function ReminderTracking({ searchTerm }: ReminderTrackingProps) 
 
   useEffect(() => {
     loadReminders();
-  }, [page, size, searchTerm, statusFilter]);
+  }, [page, size, searchTerm, statusFilter, chartInterval]);
 
   useEffect(() => {
     setPage(0);
   }, [searchTerm, statusFilter]);
 
-  const maxChartValue = Math.max(...timeseries.map(point => Number(point.count ?? 0)), 1);
+  const chartPoints = useMemo(() => groupTimeSeries(timeseries, chartInterval), [timeseries, chartInterval]);
+  const maxChartValue = Math.max(...chartPoints.map(point => Number(point.count ?? 0)), 1);
 
   const visibleRows = useMemo(() => rows, [rows]);
 
@@ -262,20 +265,30 @@ export default function ReminderTracking({ searchTerm }: ReminderTrackingProps) 
               <h2>Timeseries reminder</h2>
               <p>Số reminder được tạo theo ngày từ endpoint timeseries</p>
             </div>
-            <Clock />
+            <div className="reminder-tracking__chart-actions">
+              <select value={chartInterval} onChange={event => setChartInterval(event.target.value as IntervalValue)}>
+                {intervalOptions.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <Clock />
+            </div>
           </div>
           <div className="reminder-tracking__chart">
-            {timeseries.length > 0 ? (
-              timeseries.slice(-12).map(point => {
+            {chartPoints.length > 0 ? (
+              chartPoints.map(point => {
                 const value = Number(point.count ?? 0);
                 return (
                   <div className="reminder-tracking__chart-item" key={point.period}>
+                    <span className="reminder-tracking__chart-tooltip">
+                      {point.period}: {formatNumber(value)}
+                    </span>
                     <div
                       className="reminder-tracking__chart-bar"
                       style={{ height: `${Math.max((value / maxChartValue) * 100, 8)}%` }}
-                      title={`${point.period}: ${value}`}
                     />
-                    <span>{point.period.slice(5)}</span>
                   </div>
                 );
               })

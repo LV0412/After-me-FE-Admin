@@ -30,6 +30,16 @@ export default function Header({
         return 'Tìm kiếm mã giao dịch hoặc email người mua...';
       case 'subscriptions':
         return 'Tìm kiếm tên gói dịch vụ hoặc email...';
+      case 'checkins':
+        return 'Tìm kiếm check-in theo user, reminder hoặc trạng thái...';
+      case 'safety':
+        return 'Tìm kiếm safety alert theo user, contact hoặc trạng thái...';
+      case 'plans':
+        return 'Tìm kiếm plan theo tên, mã gói hoặc feature...';
+      case 'notifications':
+        return 'Tìm kiếm template, notification log hoặc provider...';
+      case 'audit':
+        return 'Tìm kiếm audit theo actor, action hoặc target...';
       default:
         return 'Tìm kiếm cài đặt, log, thống kê...';
     }

@@ -147,6 +147,14 @@
   color: #dc2626;
 }
 
+.dashboard-card__comparison {
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #94a3b8;
+  line-height: 1.35;
+}
+
 .dashboard-card__icon {
   padding: 12px;
   border-radius: 12px;
@@ -377,20 +385,22 @@
 }
 
 .dashboard-line-chart {
+  --chart-line: #2563eb;
+  --chart-fill: rgba(37, 99, 235, 0.2);
   position: relative;
   height: 256px;
   width: 100%;
+  padding: 8px 0 0;
 }
 
-.dashboard-line-chart__grid {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  opacity: 0.1;
-  pointer-events: none;
-  padding-bottom: 32px;
+.dashboard-line-chart--danger {
+  --chart-line: #dc2626;
+  --chart-fill: rgba(220, 38, 38, 0.16);
+}
+
+.dashboard-line-chart--money {
+  --chart-line: #0f766e;
+  --chart-fill: rgba(15, 118, 110, 0.18);
 }
 
 .dashboard-line-chart__svg {
@@ -398,22 +408,89 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  padding-bottom: 32px;
+  overflow: visible;
 }
 
-.dashboard-line-chart__axis {
+.dashboard-line-chart__grid-line {
+  stroke: #e2e8f0;
+  stroke-dasharray: 2 3;
+  stroke-width: 0.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.dashboard-line-chart__area {
+  fill: var(--chart-fill);
+}
+
+.dashboard-line-chart__line {
+  fill: none;
+  stroke: var(--chart-line);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3;
+  vector-effect: non-scaling-stroke;
+}
+
+.dashboard-line-chart__y-axis {
   position: absolute;
+  top: 0;
   bottom: 0;
   left: 0;
-  width: 100%;
   display: flex;
+  flex-direction: column;
   justify-content: space-between;
+  width: 52px;
   font-size: 12px;
   font-weight: 700;
   color: #64748b;
-  border-top: 1px solid #f1f5f9;
-  padding-top: 8px;
-  background: #ffffff;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.dashboard-line-chart__points {
+  position: absolute;
+  inset: 0;
+}
+
+.dashboard-line-chart__point {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border: 2px solid #ffffff;
+  border-radius: 9999px;
+  background: var(--chart-line);
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.16);
+  transform: translate(-50%, -50%);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.dashboard-line-chart__point:hover {
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.2);
+  transform: translate(-50%, -50%) scale(1.2);
+}
+
+.dashboard-line-chart__tooltip {
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  padding: 4px 10px;
+  background: #002046;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 6px;
+  box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.1);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 4px) scale(0.9);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  z-index: 10;
+}
+
+.dashboard-line-chart__point:hover .dashboard-line-chart__tooltip {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1);
 }
 
 .dashboard-activity-card {

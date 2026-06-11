@@ -9,6 +9,13 @@ import ReminderTracking from './components/ReminderTracking';
 import FinancialAdmin from './components/FinancialAdmin';
 import SystemSettings from './components/SystemSettings';
 import LoginScreen from './components/LoginScreen';
+import {
+  AuditLogManagement,
+  CheckInManagement,
+  NotificationTemplateManagement,
+  PlanPricingManagement,
+  SafetyManagement
+} from './components/AdminMvpModule';
 import { X, ShieldAlert, CheckCircle } from 'lucide-react';
 import {
   adminSettingsToSystemConfig,
@@ -19,6 +26,7 @@ import {
   getFinanceTransactions,
   getReminders,
   getSubscriptions,
+  logoutAdmin,
   type AdminUserRowDto,
   type ActivityLogDto,
   type DashboardOverviewDto,
@@ -173,7 +181,10 @@ function mapActivityLogToAuditLog(row: ActivityLogDto): AuditLog {
 }
 
 export default function App() {
-  const [adminEmail, setAdminEmail] = useState('');
+  const [adminEmail, setAdminEmail] = useState(() => {
+    const token = localStorage.getItem('afterme-admin-token');
+    return token ? localStorage.getItem('afterme-admin-email') || '' : '';
+  });
   // Page Navigation State
   const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
   const [searchTerm, setSearchTerm] = useState('');
@@ -195,7 +206,13 @@ export default function App() {
   const [selectedActivity, setSelectedActivity] = useState<any | null>(null);
 
   useEffect(() => {
-    clearStoredAdminSession();
+    const handleAuthExpired = () => {
+      clearStoredAdminSession();
+      setAdminEmail('');
+    };
+
+    window.addEventListener('afterme-admin-auth-expired', handleAuthExpired);
+    return () => window.removeEventListener('afterme-admin-auth-expired', handleAuthExpired);
   }, []);
 
   useEffect(() => {
@@ -273,6 +290,17 @@ export default function App() {
     localStorage.setItem('afterme-admin-name', session.fullName);
     localStorage.setItem('afterme-admin-role', session.role);
     setAdminEmail(session.email);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logoutAdmin();
+    } finally {
+      clearStoredAdminSession();
+      setAdminEmail('');
+      setActiveTab('overview');
+      setSearchTerm('');
+    }
   };
 
   if (!adminEmail) {
@@ -496,6 +524,7 @@ export default function App() {
         }} 
         config={config} 
         onExport={() => handleExportCSV('user-report')}
+        onLogout={handleLogout}
       />
 
       {/* Main Content Area Side layout */}
@@ -547,12 +576,32 @@ export default function App() {
             />
           )}
 
+          {activeTab === 'checkins' && (
+            <CheckInManagement />
+          )}
+
+          {activeTab === 'safety' && (
+            <SafetyManagement />
+          )}
+
           {activeTab === 'finance' && (
             <FinancialAdmin 
               transactions={transactions}
               searchTerm={searchTerm}
               onUpdateTransactionStatus={handleUpdateTransactionStatus}
             />
+          )}
+
+          {activeTab === 'plans' && (
+            <PlanPricingManagement />
+          )}
+
+          {activeTab === 'notifications' && (
+            <NotificationTemplateManagement />
+          )}
+
+          {activeTab === 'audit' && (
+            <AuditLogManagement />
           )}
 
           {activeTab === 'settings' && (
