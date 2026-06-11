@@ -31,6 +31,7 @@ import {
   upgradeSubscription
 } from '../api/adminApi';
 import { Subscription } from '../types';
+import { groupTimeSeries, intervalOptions, type IntervalValue } from '../utils/timeSeries';
 import '../styles/SubscriptionManagement.css';
 
 interface SubscriptionManagementProps {
@@ -130,6 +131,7 @@ export default function SubscriptionManagement({ searchTerm }: SubscriptionManag
   const [actionMode, setActionMode] = useState<ActionMode>('upgrade');
   const [planName, setPlanName] = useState('');
   const [extendDays, setExtendDays] = useState(30);
+  const [chartInterval, setChartInterval] = useState<IntervalValue>('DAY');
 
   const loadSubscriptions = async () => {
     setLoading(true);
@@ -144,7 +146,7 @@ export default function SubscriptionManagement({ searchTerm }: SubscriptionManag
           status: statusFilter === 'All' ? undefined : statusFilter
         }),
         getSubscriptionSummary(),
-        getSubscriptionAnalytics({ interval: 'DAY' })
+        getSubscriptionAnalytics({ interval: chartInterval })
       ]);
 
       setRows(listResponse.data.content);
@@ -169,7 +171,7 @@ export default function SubscriptionManagement({ searchTerm }: SubscriptionManag
 
   useEffect(() => {
     loadSubscriptions();
-  }, [page, size, searchTerm, statusFilter]);
+  }, [page, size, searchTerm, statusFilter, chartInterval]);
 
   useEffect(() => {
     setPage(0);
@@ -183,7 +185,10 @@ export default function SubscriptionManagement({ searchTerm }: SubscriptionManag
     return rows.filter(row => row.planName.toLowerCase().includes(planFilter.toLowerCase()));
   }, [rows, planFilter]);
 
-  const chartPoints = analytics?.subscriptionGrowth ?? [];
+  const chartPoints = useMemo(
+    () => groupTimeSeries(analytics?.subscriptionGrowth ?? [], chartInterval),
+    [analytics?.subscriptionGrowth, chartInterval]
+  );
   const maxChartValue = Math.max(...chartPoints.map(point => Number(point.count ?? 0)), 1);
 
   const refreshAfterMutation = async (updated?: SubscriptionRowDto) => {
@@ -323,20 +328,30 @@ export default function SubscriptionManagement({ searchTerm }: SubscriptionManag
               <h2>Phân tích subscription</h2>
               <p>Dữ liệu từ endpoint analytics theo ngày</p>
             </div>
-            <BarChart3 />
+            <div className="subscription-management__chart-actions">
+              <select value={chartInterval} onChange={event => setChartInterval(event.target.value as IntervalValue)}>
+                {intervalOptions.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <BarChart3 />
+            </div>
           </div>
           <div className="subscription-management__chart">
             {chartPoints.length > 0 ? (
-              chartPoints.slice(-12).map(point => {
+              chartPoints.map(point => {
                 const value = Number(point.count ?? 0);
                 return (
                   <div className="subscription-management__chart-item" key={point.period}>
+                    <span className="subscription-management__chart-tooltip">
+                      {point.period}: {formatNumber(value)}
+                    </span>
                     <div
                       className="subscription-management__chart-bar"
                       style={{ height: `${Math.max((value / maxChartValue) * 100, 8)}%` }}
-                      title={`${point.period}: ${value}`}
                     />
-                    <span>{point.period.slice(5)}</span>
                   </div>
                 );
               })
@@ -434,8 +449,8 @@ export default function SubscriptionManagement({ searchTerm }: SubscriptionManag
                     </td>
                     <td>{row.billingCycle || '-'}</td>
                     <td className="subscription-management__money">{formatMoney(row.planPrice)}</td>
-                    <td className="subscription-management__muted">{formatDate(row.startedAt)}</td>
-                    <td className="subscription-management__muted">{formatDate(row.expiresAt)}</td>
+                    <td className="subscription-management__date-cell">{formatDate(row.startedAt)}</td>
+                    <td className="subscription-management__date-cell">{formatDate(row.expiresAt)}</td>
                     <td>
                       <span className={`subscription-management__status ${getStatusClass(row.status)}`}>
                         {getStatusLabel(row.status)}

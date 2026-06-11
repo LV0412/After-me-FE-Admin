@@ -153,6 +153,22 @@
   color: #00855f;
 }
 
+.subscription-management__chart-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.subscription-management__chart-actions select {
+  border: 1px solid #d7e3ef;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 850;
+  padding: 8px 10px;
+}
+
 .subscription-management__chart {
   height: 230px;
   border: 1px solid #e8eef5;
@@ -167,13 +183,38 @@
 
 .subscription-management__chart-item {
   height: 100%;
-  min-width: 30px;
+  min-width: 12px;
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
+  position: relative;
+}
+
+.subscription-management__chart-tooltip {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translate(-50%, 4px) scale(0.95);
+  opacity: 0;
+  z-index: 5;
+  border-radius: 8px;
+  background: #002046;
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 900;
+  padding: 5px 9px;
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: 0 12px 20px rgba(15, 23, 42, 0.16);
+  transition: opacity 150ms ease, transform 150ms ease;
+}
+
+.subscription-management__chart-item:hover .subscription-management__chart-tooltip {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1);
 }
 
 .subscription-management__chart-bar {
@@ -347,6 +388,44 @@
   width: 100%;
   border-collapse: collapse;
   min-width: 1240px;
+  table-layout: fixed;
+}
+
+.subscription-management__table th:nth-child(1),
+.subscription-management__table td:nth-child(1) {
+  width: 260px;
+}
+
+.subscription-management__table th:nth-child(2),
+.subscription-management__table td:nth-child(2) {
+  width: 150px;
+}
+
+.subscription-management__table th:nth-child(3),
+.subscription-management__table td:nth-child(3) {
+  width: 110px;
+}
+
+.subscription-management__table th:nth-child(4),
+.subscription-management__table td:nth-child(4) {
+  width: 120px;
+}
+
+.subscription-management__table th:nth-child(5),
+.subscription-management__table td:nth-child(5),
+.subscription-management__table th:nth-child(6),
+.subscription-management__table td:nth-child(6) {
+  width: 135px;
+}
+
+.subscription-management__table th:nth-child(7),
+.subscription-management__table td:nth-child(7) {
+  width: 150px;
+}
+
+.subscription-management__table th:nth-child(8),
+.subscription-management__table td:nth-child(8) {
+  width: 210px;
 }
 
 .subscription-management__table thead {
@@ -446,6 +525,13 @@
   color: #58708e !important;
   font-size: 0.8rem;
   font-weight: 850 !important;
+}
+
+.subscription-management__date-cell {
+  color: #425c7f !important;
+  font-size: 0.9rem !important;
+  font-weight: 850 !important;
+  white-space: nowrap;
 }
 
 .subscription-management__money {

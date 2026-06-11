@@ -26,6 +26,7 @@ import {
   type TransactionSummaryDto
 } from '../api/adminApi';
 import { Transaction } from '../types';
+import { groupTimeSeries, intervalOptions, type IntervalValue } from '../utils/timeSeries';
 import '../styles/financial/FinancialAdmin.css';
 
 interface FinancialAdminProps {
@@ -142,6 +143,7 @@ export default function FinancialAdmin({ searchTerm }: FinancialAdminProps) {
   const [actionLoading, setActionLoading] = useState(false);
   const [detail, setDetail] = useState<TransactionRowDto | null>(null);
   const [notice, setNotice] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [chartInterval, setChartInterval] = useState<IntervalValue>('DAY');
 
   const loadFinance = async () => {
     setLoading(true);
@@ -150,7 +152,7 @@ export default function FinancialAdmin({ searchTerm }: FinancialAdminProps) {
     try {
       const [summaryResponse, timeseriesResponse, byPlanResponse, listResponse, transactionSummaryResponse] = await Promise.all([
         getFinanceSummary(),
-        getFinanceRevenueTimeseries({ interval: 'DAY' }),
+        getFinanceRevenueTimeseries({ interval: chartInterval }),
         getFinanceRevenueByPlan(),
         getFinanceTransactions({
           page,
@@ -187,13 +189,17 @@ export default function FinancialAdmin({ searchTerm }: FinancialAdminProps) {
 
   useEffect(() => {
     loadFinance();
-  }, [page, size, searchTerm, statusFilter]);
+  }, [page, size, searchTerm, statusFilter, chartInterval]);
 
   useEffect(() => {
     setPage(0);
   }, [searchTerm, statusFilter]);
 
-  const maxRevenue = Math.max(...revenueTimeseries.map(point => Number(point.amount ?? 0)), 1);
+  const revenueChartPoints = useMemo(
+    () => groupTimeSeries(revenueTimeseries, chartInterval),
+    [revenueTimeseries, chartInterval]
+  );
+  const maxRevenue = Math.max(...revenueChartPoints.map(point => Number(point.amount ?? 0)), 1);
   const planTotal = useMemo(
     () => revenueByPlan.reduce((sum, plan) => sum + Number(plan.revenue ?? 0), 0),
     [revenueByPlan]
@@ -278,23 +284,31 @@ export default function FinancialAdmin({ searchTerm }: FinancialAdminProps) {
               <h3 className="finance-admin__card-title">Timeseries doanh thu</h3>
               <p className="finance-admin__card-subtitle">Dữ liệu từ `/finance/revenue/timeseries`</p>
             </div>
+            <select className="finance-admin__select" value={chartInterval} onChange={event => setChartInterval(event.target.value as IntervalValue)}>
+              {intervalOptions.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="finance-admin__bar-chart">
             <div className="finance-admin__chart-unit">VND</div>
-            {revenueTimeseries.length > 0 ? (
-              revenueTimeseries.slice(-12).map(point => {
+            {revenueChartPoints.length > 0 ? (
+              revenueChartPoints.map(point => {
                 const amount = Number(point.amount ?? 0);
                 return (
                   <div key={point.period} className="finance-admin__bar-chart-item">
-                    <span className="finance-admin__bar-chart-tooltip">{formatMoney(amount)}</span>
+                    <span className="finance-admin__bar-chart-tooltip">
+                      {point.period}: {formatMoney(amount)}
+                    </span>
                     <div className="finance-admin__bar-track">
                       <div
                         className="finance-admin__bar finance-admin__bar--primary"
                         style={{ height: `${Math.max((amount / maxRevenue) * 100, 8)}%` }}
                       />
                     </div>
-                    <span className="finance-admin__bar-label">{point.period.slice(5)}</span>
                   </div>
                 );
               })

@@ -1,4 +1,15 @@
-export type DashboardTab = 'overview' | 'users' | 'subscriptions' | 'reminders' | 'finance' | 'settings';
+export type DashboardTab =
+  | 'overview'
+  | 'users'
+  | 'subscriptions'
+  | 'reminders'
+  | 'checkins'
+  | 'safety'
+  | 'finance'
+  | 'plans'
+  | 'notifications'
+  | 'audit'
+  | 'settings';
 
 export interface User {
   id: string; // e.g. USR-8902

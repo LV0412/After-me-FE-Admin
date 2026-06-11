@@ -105,6 +105,25 @@ export interface AdminUserSummaryDto {
   premiumUsers: number;
 }
 
+export interface AdminUserCreateRequest {
+  email: string;
+  passwordHash: string;
+  fullName: string;
+  tonePreference: string;
+  status: string;
+  role: string;
+}
+
+export interface UserResponseDto {
+  id: number;
+  email: string;
+  fullName: string;
+  tonePreference: string;
+  status: string;
+  role: string;
+  createdAt: string;
+}
+
 export interface PagedContentResponseDto<T> {
   content: T[];
   page: number;
@@ -312,7 +331,187 @@ export interface ActivityLogDto {
   createdAt: string;
 }
 
+export interface CheckInRowDto {
+  id: number;
+  userId: number;
+  userEmail: string;
+  reminderId: number;
+  reminderTitle: string;
+  scheduleId: number;
+  scheduledTime: string;
+  responseDeadline: string;
+  lastNotificationAt: string | null;
+  resolvedAt: string | null;
+  status: string;
+  escalationLevel: number;
+  missedCount: number;
+  responseAction: string | null;
+  responseTime: string | null;
+}
+
+export interface CheckInSummaryDto {
+  scheduled: number;
+  completed: number;
+  missed: number;
+  escalated: number;
+  successRate: number;
+  checkInsToday: number;
+}
+
+export interface SafetyAlertRowDto {
+  id: number;
+  userId: number;
+  userEmail: string;
+  reminderId: number;
+  reminderTitle: string;
+  instanceId: number;
+  trustedContactId: number;
+  trustedContactName: string;
+  method: string;
+  status: string;
+  triggeredAt: string;
+  locationUrl: string | null;
+}
+
+export interface SafetyAlertSummaryDto {
+  openAlerts: number;
+  sentToday: number;
+  failedDelivery: number;
+  resolvedAlerts: number;
+  avgResponseMinutes: number;
+}
+
+export interface TrustedContactDto {
+  id: number;
+  userId: number;
+  fullName: string;
+  relationship: string;
+  phone: string;
+  email: string;
+  priority: number;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface AdminPlanRowDto {
+  id: number;
+  name: string;
+  price: number;
+  billingCycle: string;
+  maxReminders: number;
+  maxTrustedContacts: number;
+  maxDigitalAssets: number;
+  features: string;
+  active: boolean;
+  createdAt: string;
+  archivedAt: string | null;
+}
+
+export interface AdminPlanSummaryDto {
+  activePlans: number;
+  paidUsers: number;
+  topPlan: string;
+  draftChanges: number;
+}
+
+export interface AdminPlanRequest {
+  name: string;
+  price: number;
+  billingCycle: string;
+  maxReminders: number;
+  maxTrustedContacts: number;
+  maxDigitalAssets: number;
+  features: string;
+  active: boolean;
+}
+
+export interface AdminPlanPriceRequest {
+  price: number;
+  billingCycle: string;
+}
+
+export interface NotificationSummaryDto {
+  sentToday: number;
+  failed: number;
+  templates: number;
+  providers: number;
+}
+
+export interface NotificationTemplateDto {
+  id: number;
+  eventType: string;
+  channel: string;
+  locale: string;
+  subject: string;
+  body: string;
+  variables: string[];
+  active: boolean;
+  updatedAt: string;
+}
+
+export interface NotificationTemplateRequest {
+  eventType: string;
+  channel: string;
+  locale: string;
+  subject: string;
+  body: string;
+  variables: string[];
+  active: boolean;
+}
+
+export interface NotificationPreviewResponseDto {
+  subject: string;
+  body: string;
+}
+
+export interface NotificationLogDto {
+  id: number;
+  userId: number;
+  eventType: string;
+  channel: string;
+  status: string;
+  recipient: string;
+  providerResponse: string;
+  createdAt: string;
+}
+
+export interface AuditLogRowDto {
+  id: number;
+  actor: string;
+  action: string;
+  targetType: string;
+  targetId: string | null;
+  status: string;
+  metadata: string | null;
+  createdAt: string;
+}
+
+export interface AuditLogSummaryDto {
+  eventsToday: number;
+  failedActions: number;
+  sensitiveChanges: number;
+  exports: number;
+}
+
+export interface CreateAuditLogRequest {
+  actor: string;
+  action: string;
+  targetType: string;
+  targetId: string | null;
+  status: string;
+  metadata: string;
+}
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
+const ADMIN_TOKEN_KEY = 'afterme-admin-token';
+const ADMIN_SESSION_KEYS = [
+  'afterme-admin-email',
+  ADMIN_TOKEN_KEY,
+  'afterme-admin-name',
+  'afterme-admin-role'
+];
+
+let refreshSessionPromise: Promise<string | null> | null = null;
 
 function buildUrl(path: string, query?: Record<string, QueryValue>) {
   const url = new URL(path, API_BASE_URL || window.location.origin);
@@ -329,16 +528,7 @@ function buildUrl(path: string, query?: Record<string, QueryValue>) {
 }
 
 async function requestJson<T>(path: string, init?: RequestInit, query?: Record<string, QueryValue>): Promise<BaseResponse<T>> {
-  const accessToken = localStorage.getItem('afterme-admin-token');
-  const response = await fetch(buildUrl(path, query), {
-    headers: {
-      'Content-Type': 'application/json',
-      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-      ...(init?.headers ?? {})
-    },
-    credentials: 'include',
-    ...init
-  });
+  const response = await fetchJson(path, init, query);
 
   if (!response.ok) {
     throw new Error(`Request failed with status ${response.status}`);
@@ -353,14 +543,86 @@ async function requestJson<T>(path: string, init?: RequestInit, query?: Record<s
   return payload;
 }
 
+async function fetchJson(path: string, init?: RequestInit, query?: Record<string, QueryValue>, retried = false): Promise<Response> {
+  const accessToken = localStorage.getItem(ADMIN_TOKEN_KEY);
+  const response = await fetch(buildUrl(path, query), {
+    ...init,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+      ...(init?.headers ?? {})
+    },
+    credentials: 'include',
+  });
+
+  if (response.status !== 401 || retried || path.startsWith('/api/auth/')) {
+    return response;
+  }
+
+  const refreshedToken = await refreshAdminSession();
+  if (!refreshedToken) {
+    clearStoredAdminSession();
+    window.dispatchEvent(new Event('afterme-admin-auth-expired'));
+    return response;
+  }
+
+  return fetchJson(path, init, query, true);
+}
+
 async function requestText(path: string, init?: RequestInit, query?: Record<string, QueryValue>): Promise<string> {
-  const response = await fetch(buildUrl(path, query), init);
+  const response = await fetchJson(path, init, query);
 
   if (!response.ok) {
     throw new Error(`Request failed with status ${response.status}`);
   }
 
   return response.text();
+}
+
+async function requestRawJson<T>(path: string, init?: RequestInit, query?: Record<string, QueryValue>): Promise<T> {
+  const response = await fetchJson(path, init, query);
+
+  if (!response.ok) {
+    throw new Error(`Request failed with status ${response.status}`);
+  }
+
+  return response.json() as Promise<T>;
+}
+
+function clearStoredAdminSession() {
+  ADMIN_SESSION_KEYS.forEach((key) => localStorage.removeItem(key));
+}
+
+export async function refreshAdminSession() {
+  if (!refreshSessionPromise) {
+    refreshSessionPromise = fetch(buildUrl('/api/auth/refresh-token'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include'
+    })
+      .then(async (response) => {
+        if (!response.ok) {
+          return null;
+        }
+
+        const payload = (await response.json()) as BaseResponse<SignInResponseDto>;
+        if (payload.success === false || !payload.data?.accessToken) {
+          return null;
+        }
+
+        localStorage.setItem('afterme-admin-email', payload.data.email);
+        localStorage.setItem(ADMIN_TOKEN_KEY, payload.data.accessToken);
+        localStorage.setItem('afterme-admin-name', payload.data.fullName);
+        localStorage.setItem('afterme-admin-role', payload.data.role);
+        return payload.data.accessToken;
+      })
+      .catch(() => null)
+      .finally(() => {
+        refreshSessionPromise = null;
+      });
+  }
+
+  return refreshSessionPromise;
 }
 
 function normalizeSettingsSource(values: AdminSettingsDto | null | undefined) {
@@ -427,6 +689,13 @@ export function getDashboardOverviewCards() {
 
 export function getAdminUsers(query?: Record<string, QueryValue>) {
   return requestJson<PagedContentResponseDto<AdminUserRowDto>>('/api/admin/users', undefined, query);
+}
+
+export function createAdminUser(body: AdminUserCreateRequest) {
+  return requestRawJson<UserResponseDto>('/api/users', {
+    method: 'POST',
+    body: JSON.stringify(body)
+  });
 }
 
 export function getAdminUserById(id: string) {
@@ -511,6 +780,10 @@ export function signInAdmin(email: string, password: string) {
   });
 }
 
+export function logoutAdmin() {
+  return requestJson<void>('/api/auth/log-out', { method: 'POST' });
+}
+
 export function reactivateSubscription(id: string, body?: SubscriptionReactivateRequest) {
   return requestJson<SubscriptionRowDto>(`/api/admin/subscriptions/${id}/reactivate`, {
     method: 'POST',
@@ -575,4 +848,155 @@ export function getReportOverview() {
 
 export function getActivityLog(query?: Record<string, QueryValue>) {
   return requestJson<PagedResponseDto<ActivityLogDto>>('/api/admin/reports/activity-log', undefined, query);
+}
+
+export function getCheckIns(query?: Record<string, QueryValue>) {
+  return requestJson<PagedResponseDto<CheckInRowDto>>('/api/admin/check-ins', undefined, query);
+}
+
+export function getCheckInSummary(query?: Record<string, QueryValue>) {
+  return requestJson<CheckInSummaryDto>('/api/admin/check-ins/summary', undefined, query);
+}
+
+export function getCheckInTimeseries(query?: Record<string, QueryValue>) {
+  return requestJson<TimeSeriesPointDto[]>('/api/admin/check-ins/timeseries', undefined, query);
+}
+
+export function getReminderExecutions(id: string, query?: Record<string, QueryValue>) {
+  return requestJson<PagedResponseDto<CheckInRowDto>>(`/api/admin/reminders/${id}/executions`, undefined, query);
+}
+
+export function retryCheckIn(id: string) {
+  return requestJson<CheckInRowDto>(`/api/admin/check-ins/${id}/retry`, { method: 'POST' });
+}
+
+export function updateCheckInStatus(id: string, status: string) {
+  return requestJson<CheckInRowDto>(`/api/admin/check-ins/${id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status })
+  });
+}
+
+export function getSafetyAlerts(query?: Record<string, QueryValue>) {
+  return requestJson<PagedResponseDto<SafetyAlertRowDto>>('/api/admin/safety/alerts', undefined, query);
+}
+
+export function getSafetyAlertSummary(query?: Record<string, QueryValue>) {
+  return requestJson<SafetyAlertSummaryDto>('/api/admin/safety/alerts/summary', undefined, query);
+}
+
+export function getSafetyAlertById(id: string) {
+  return requestJson<SafetyAlertRowDto>(`/api/admin/safety/alerts/${id}`);
+}
+
+export function updateSafetyAlertStatus(id: string, status: string) {
+  return requestJson<SafetyAlertRowDto>(`/api/admin/safety/alerts/${id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status })
+  });
+}
+
+export function resendSafetyAlert(id: string) {
+  return requestJson<SafetyAlertRowDto>(`/api/admin/safety/alerts/${id}/resend`, { method: 'POST' });
+}
+
+export function getTrustedContacts(userId: string) {
+  return requestJson<TrustedContactDto[]>(`/api/admin/users/${userId}/trusted-contacts`);
+}
+
+export function getAdminPlans(query?: Record<string, QueryValue>) {
+  return requestJson<AdminPlanRowDto[]>('/api/admin/plans', undefined, query);
+}
+
+export function getAdminPlanSummary() {
+  return requestJson<AdminPlanSummaryDto>('/api/admin/plans/summary');
+}
+
+export function createAdminPlan(body: AdminPlanRequest) {
+  return requestJson<AdminPlanRowDto>('/api/admin/plans', {
+    method: 'POST',
+    body: JSON.stringify(body)
+  });
+}
+
+export function getAdminPlanById(id: string) {
+  return requestJson<AdminPlanRowDto>(`/api/admin/plans/${id}`);
+}
+
+export function updateAdminPlan(id: string, body: AdminPlanRequest) {
+  return requestJson<AdminPlanRowDto>(`/api/admin/plans/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(body)
+  });
+}
+
+export function updateAdminPlanPrice(id: string, body: AdminPlanPriceRequest) {
+  return requestJson<AdminPlanRowDto>(`/api/admin/plans/${id}/prices`, {
+    method: 'POST',
+    body: JSON.stringify(body)
+  });
+}
+
+export function archiveAdminPlan(id: string) {
+  return requestJson<AdminPlanRowDto>(`/api/admin/plans/${id}/archive`, { method: 'POST' });
+}
+
+export function getNotificationSummary() {
+  return requestJson<NotificationSummaryDto>('/api/admin/notifications/summary');
+}
+
+export function getNotificationTemplates(query?: Record<string, QueryValue>) {
+  return requestJson<NotificationTemplateDto[]>('/api/admin/notifications/templates', undefined, query);
+}
+
+export function createNotificationTemplate(body: NotificationTemplateRequest) {
+  return requestJson<NotificationTemplateDto>('/api/admin/notifications/templates', {
+    method: 'POST',
+    body: JSON.stringify(body)
+  });
+}
+
+export function updateNotificationTemplate(id: string, body: NotificationTemplateRequest) {
+  return requestJson<NotificationTemplateDto>(`/api/admin/notifications/templates/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(body)
+  });
+}
+
+export function previewNotificationTemplate(id: string, variables: Record<string, string>) {
+  return requestJson<NotificationPreviewResponseDto>(`/api/admin/notifications/templates/${id}/preview`, {
+    method: 'POST',
+    body: JSON.stringify({ variables })
+  });
+}
+
+export function getNotificationLogs(query?: Record<string, QueryValue>) {
+  return requestJson<PagedResponseDto<NotificationLogDto>>('/api/admin/notifications/logs', undefined, query);
+}
+
+export function retryNotificationLog(id: string) {
+  return requestJson<NotificationLogDto>(`/api/admin/notifications/logs/${id}/retry`, { method: 'POST' });
+}
+
+export function getAuditLogs(query?: Record<string, QueryValue>) {
+  return requestJson<PagedResponseDto<AuditLogRowDto>>('/api/admin/audit-logs', undefined, query);
+}
+
+export function getAuditLogSummary(query?: Record<string, QueryValue>) {
+  return requestJson<AuditLogSummaryDto>('/api/admin/audit-logs/summary', undefined, query);
+}
+
+export function getAuditLogById(id: string) {
+  return requestJson<AuditLogRowDto>(`/api/admin/audit-logs/${id}`);
+}
+
+export function exportAuditLogs(query?: Record<string, QueryValue>) {
+  return requestText('/api/admin/audit-logs/export', undefined, query);
+}
+
+export function createAuditLog(body: CreateAuditLogRequest) {
+  return requestJson<AuditLogRowDto>('/api/admin/audit-logs', {
+    method: 'POST',
+    body: JSON.stringify(body)
+  });
 }

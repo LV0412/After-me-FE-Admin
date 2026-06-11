@@ -189,6 +189,7 @@
 
 .finance-admin__bar-chart-item {
   flex-grow: 1;
+  min-width: 12px;
   display: flex;
   flex-direction: column;
   justify-content: end;
@@ -201,7 +202,8 @@
 .finance-admin__bar-chart-tooltip {
   position: absolute;
   top: -12px;
-  transform: scale(0.9);
+  left: 50%;
+  transform: translateX(-50%) scale(0.9);
   opacity: 0;
   background: #002046;
   color: #ffffff;
@@ -212,11 +214,12 @@
   transition: all 0.2s ease;
   z-index: 10;
   user-select: none;
+  white-space: nowrap;
 }
 
 .finance-admin__bar-chart-item:hover .finance-admin__bar-chart-tooltip {
   opacity: 1;
-  transform: scale(1);
+  transform: translateX(-50%) scale(1);
 }
 
 .finance-admin__bar-track {
