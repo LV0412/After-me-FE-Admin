@@ -857,6 +857,10 @@
 }
 
 @media (max-width: 720px) {
+  .admin-mvp-module {
+    gap: 18px;
+  }
+
   .admin-mvp-module__hero,
   .admin-mvp-module__work-item,
   .admin-mvp-module__note {
@@ -864,13 +868,34 @@
     flex-direction: column;
   }
 
+  .admin-mvp-module__hero,
+  .admin-mvp-module__metric,
+  .admin-mvp-module__panel,
+  .admin-mvp-module__note {
+    border-radius: 14px;
+  }
+
+  .admin-mvp-module__hero {
+    padding: 18px;
+  }
+
+  .admin-mvp-module__hero h2 {
+    font-size: 20px;
+  }
+
   .admin-mvp-module__refresh {
+    width: 100%;
     margin-left: 0;
   }
 
   .admin-mvp-module__toolbar {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .admin-mvp-module__toolbar select,
+  .admin-mvp-module__toolbar button {
+    width: 100%;
   }
 
   .admin-mvp-module__metrics {
@@ -892,5 +917,15 @@
   .admin-template-editor__section-title span {
     max-width: none;
     text-align: left;
+  }
+
+  .admin-mvp-module__pager {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-plan-editor__actions,
+  .admin-template-editor__actions {
+    position: static;
   }
 }

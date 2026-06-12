@@ -1000,19 +1000,53 @@
 }
 
 @media (max-width: 720px) {
+  .finance-admin {
+    gap: 22px;
+  }
+
   .finance-admin__summary-strip,
   .finance-admin__detail-grid {
     grid-template-columns: 1fr;
+  }
+
+  .finance-admin__revenue-card,
+  .finance-admin__donut-card,
+  .finance-admin__metric-card {
+    border-radius: 16px;
+    padding: 18px;
+  }
+
+  .finance-admin__card-head,
+  .finance-admin__table-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .finance-admin__bar-chart {
+    height: 220px;
+    gap: 8px;
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+
+  .finance-admin__donut-shell {
+    width: 150px;
+    height: 150px;
   }
 
   .finance-admin__filters,
   .finance-admin__filters select,
   .finance-admin__refresh-button {
     width: 100%;
+    min-width: 0;
   }
 
   .finance-admin__footer {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .finance-admin__modal-backdrop {
+    padding: 12px;
   }
 }

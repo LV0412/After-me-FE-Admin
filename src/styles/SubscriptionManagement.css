@@ -882,6 +882,10 @@
 }
 
 @media (max-width: 720px) {
+  .subscription-management {
+    gap: 22px;
+  }
+
   .subscription-management__metric-card,
   .subscription-management__chart-card,
   .subscription-management__rate-card,
@@ -889,6 +893,53 @@
   .subscription-management__footer {
     padding-left: 20px;
     padding-right: 20px;
+  }
+
+  .subscription-management__metric-card,
+  .subscription-management__rate-card {
+    min-height: auto;
+    align-items: flex-start;
+    border-radius: 18px;
+    gap: 16px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+
+  .subscription-management__metric-icon {
+    width: 54px;
+    height: 54px;
+  }
+
+  .subscription-management__metric-icon svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .subscription-management__metric-body strong,
+  .subscription-management__rate-card strong {
+    font-size: 1.8rem;
+  }
+
+  .subscription-management__metric-sub {
+    margin-left: 0;
+  }
+
+  .subscription-management__section-head,
+  .subscription-management__table-title {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .subscription-management__table-title {
+    min-width: 0;
+    gap: 8px;
+  }
+
+  .subscription-management__chart {
+    height: 210px;
+    gap: 8px;
+    padding-left: 14px;
+    padding-right: 14px;
   }
 
   .subscription-management__filters,
@@ -904,5 +955,17 @@
 
   .subscription-management__detail-grid {
     grid-template-columns: 1fr;
+  }
+
+  .subscription-management__modal-backdrop {
+    padding: 12px;
+  }
+
+  .subscription-management__form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .subscription-management__form-actions button {
+    width: 100%;
   }
 }

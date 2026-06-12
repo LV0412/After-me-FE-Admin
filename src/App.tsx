@@ -188,6 +188,7 @@ export default function App() {
   // Page Navigation State
   const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
   const [searchTerm, setSearchTerm] = useState('');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Primary Databases
   const [users, setUsers] = useState<User[]>([]);
@@ -521,11 +522,22 @@ export default function App() {
         setActiveTab={(tab) => {
           setActiveTab(tab);
           setSearchTerm(''); // Clear lookups on page flips
+          setIsSidebarOpen(false);
         }} 
         config={config} 
         onExport={() => handleExportCSV('user-report')}
         onLogout={handleLogout}
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
       />
+      {isSidebarOpen && (
+        <button
+          className="app-sidebar-backdrop"
+          type="button"
+          aria-label="Dong menu"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
 
       {/* Main Content Area Side layout */}
       <div className="app-main">
@@ -536,6 +548,7 @@ export default function App() {
           onSearchChange={setSearchTerm} 
           notificationCount={notificationsCount}
           clearNotifications={() => setNotificationsCount(0)}
+          onMenuClick={() => setIsSidebarOpen(true)}
         />
 
         {/* Dynamic Inner views router container */}
