@@ -444,11 +444,20 @@
 }
 
 @media (max-width: 720px) {
+  .system-settings {
+    gap: 22px;
+  }
+
   .system-settings__panel,
   .system-settings__table-head,
   .system-settings__footer {
     padding-left: 20px;
     padding-right: 20px;
+  }
+
+  .system-settings__overview article {
+    min-height: auto;
+    border-radius: 18px;
   }
 
   .system-settings__form-grid {
@@ -460,5 +469,11 @@
   .system-settings__footer {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .system-settings__form-actions button,
+  .system-settings__table-head button {
+    width: 100%;
+    justify-content: center;
   }
 }

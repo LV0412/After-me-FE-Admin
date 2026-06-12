@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Bell, HelpCircle, Layers, Settings2, ShieldCheck } from 'lucide-react';
+import { Search, Bell, HelpCircle, Menu, Settings2, ShieldCheck } from 'lucide-react';
 import { DashboardTab } from '../types';
 import '../styles/header/Header.css';
 
@@ -9,6 +9,7 @@ interface HeaderProps {
   onSearchChange: (value: string) => void;
   notificationCount: number;
   clearNotifications: () => void;
+  onMenuClick: () => void;
 }
 
 export default function Header({ 
@@ -16,7 +17,8 @@ export default function Header({
   searchTerm, 
   onSearchChange,
   notificationCount,
-  clearNotifications
+  clearNotifications,
+  onMenuClick
 }: HeaderProps) {
   const [showNotifications, setShowNotifications] = useState(false);
 
@@ -47,6 +49,15 @@ export default function Header({
 
   return (
     <header className="admin-header">
+      <button
+        className="admin-header__menu-button"
+        type="button"
+        aria-label="Mo menu"
+        onClick={onMenuClick}
+      >
+        <Menu />
+      </button>
+
       {/* Search Input Bar */}
       <div className="admin-header__search-shell">
         <div className="admin-header__search-group group">

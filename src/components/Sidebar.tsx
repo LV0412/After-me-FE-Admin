@@ -12,7 +12,8 @@ import {
   Settings,
   ShieldAlert,
   Tags,
-  Users
+  Users,
+  X
 } from 'lucide-react';
 import { DashboardTab, SystemConfig } from '../types';
 import '../styles/sidebar/Sidebar.css';
@@ -23,6 +24,8 @@ interface SidebarProps {
   config: SystemConfig;
   onExport: () => void;
   onLogout: () => void;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
 const menuItems = [
@@ -39,9 +42,9 @@ const menuItems = [
   { id: 'settings' as DashboardTab, name: 'Cài đặt & Báo cáo', icon: Settings }
 ];
 
-export default function Sidebar({ activeTab, setActiveTab, config, onExport, onLogout }: SidebarProps) {
+export default function Sidebar({ activeTab, setActiveTab, config, onExport, onLogout, isOpen, onClose }: SidebarProps) {
   return (
-    <aside id="sidebar" className="sidebar">
+    <aside id="sidebar" className={`sidebar ${isOpen ? 'sidebar--open' : ''}`}>
       <div className="sidebar__brand">
         <div className="sidebar__logo">A</div>
         <div>
@@ -50,7 +53,9 @@ export default function Sidebar({ activeTab, setActiveTab, config, onExport, onL
           </h1>
           <p className="sidebar__subtitle">Hệ thống quản trị</p>
         </div>
-
+        <button className="sidebar__close-button" type="button" aria-label="Dong menu" onClick={onClose}>
+          <X />
+        </button>
       </div>
 
       <nav className="sidebar__nav" aria-label="Admin navigation">

@@ -714,12 +714,59 @@
 }
 
 @media (max-width: 720px) {
+  .reminder-tracking {
+    gap: 22px;
+  }
+
   .reminder-tracking__metric-card,
   .reminder-tracking__chart-card,
   .reminder-tracking__table-toolbar,
   .reminder-tracking__footer {
     padding-left: 20px;
     padding-right: 20px;
+  }
+
+  .reminder-tracking__metric-card,
+  .reminder-tracking__execution-card {
+    min-height: auto;
+    align-items: flex-start;
+    border-radius: 18px;
+    gap: 16px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+
+  .reminder-tracking__metric-icon {
+    width: 54px;
+    height: 54px;
+  }
+
+  .reminder-tracking__metric-icon svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .reminder-tracking__metric-card strong,
+  .reminder-tracking__execution-card strong {
+    font-size: 1.75rem;
+  }
+
+  .reminder-tracking__section-head,
+  .reminder-tracking__table-title {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .reminder-tracking__table-title {
+    min-width: 0;
+    gap: 8px;
+  }
+
+  .reminder-tracking__chart {
+    height: 210px;
+    gap: 8px;
+    padding-left: 14px;
+    padding-right: 14px;
   }
 
   .reminder-tracking__filters,
@@ -736,5 +783,9 @@
   .reminder-tracking__footer {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .reminder-tracking__modal-backdrop {
+    padding: 12px;
   }
 }

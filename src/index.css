@@ -23,6 +23,10 @@ body {
   overflow-x: hidden;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 /* Basic layout helpers to replace Tailwind utilities used previously */
 .app-root {
   min-height: 100vh;
@@ -45,6 +49,17 @@ body {
   width: 100%;
   margin: 0 auto;
   padding-bottom: 4rem;
+  min-width: 0;
+}
+
+.app-sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  border: 0;
+  background: rgba(15, 23, 42, 0.48);
+  backdrop-filter: blur(2px);
+  cursor: pointer;
 }
 
 .login-screen {
@@ -207,6 +222,54 @@ body {
   cursor: wait;
   opacity: 0.72;
   filter: none;
+}
+
+@media (max-width: 1023px) {
+  .app-main {
+    padding-left: 0;
+    padding-top: 72px;
+  }
+
+  .app-container {
+    max-width: none;
+    padding: 1.25rem;
+    padding-bottom: 3rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .app-main {
+    padding-top: 126px;
+  }
+
+  .app-container {
+    padding: 1rem;
+    padding-bottom: 2.5rem;
+  }
+
+  .login-screen {
+    padding: 1rem;
+  }
+
+  .login-panel {
+    border-radius: 20px;
+    padding: 1.25rem;
+  }
+
+  .login-panel__brand {
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+  }
+
+  .login-panel__logo {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+  }
+
+  .login-panel__title {
+    font-size: 1.45rem;
+  }
 }
 
 /* Custom Scrollbar Styles for beautiful dashboard tables */

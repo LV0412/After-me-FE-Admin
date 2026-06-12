@@ -640,11 +640,49 @@
 }
 
 @media (max-width: 720px) {
+  .user-management {
+    gap: 22px;
+  }
+
   .user-management__metric-card,
   .user-management__table-toolbar,
   .user-management__footer {
     padding-left: 20px;
     padding-right: 20px;
+  }
+
+  .user-management__metric-card {
+    min-height: auto;
+    align-items: flex-start;
+    border-radius: 18px;
+    gap: 16px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+
+  .user-management__metric-icon {
+    width: 54px;
+    height: 54px;
+  }
+
+  .user-management__metric-icon svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .user-management__metric-body strong {
+    font-size: 1.8rem;
+  }
+
+  .user-management__table-title {
+    min-width: 0;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .user-management__table-title h2 {
+    font-size: 1.2rem;
   }
 
   .user-management__filters,
@@ -656,6 +694,18 @@
   .user-management__footer {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .user-management__modal-backdrop {
+    padding: 12px;
+  }
+
+  .user-management__form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .user-management__form-actions button {
+    width: 100%;
   }
 
   .user-management__form-grid,
