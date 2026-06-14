@@ -44,6 +44,8 @@ type ActionMode = 'upgrade' | 'downgrade' | 'extend';
 
 const statusOptions = ['All', 'ACTIVE', 'TRIAL', 'EXPIRED', 'CANCELLED', 'PENDING', 'FAILED'];
 const planNameOptions = ['All', 'Free', 'Pro', 'Premium', 'Enterprise'];
+const CHART_BAR_MAX_HEIGHT = 128;
+const CHART_BAR_MIN_HEIGHT = 10;
 
 const emptySummary: SubscriptionSummaryDto = {
   total: 0,
@@ -78,6 +80,25 @@ function formatDate(value: string | null | undefined) {
   }
 
   return parsed.toLocaleDateString('vi-VN');
+}
+
+function formatChartPeriodLabel(period: string) {
+  const parsed = new Date(period);
+
+  if (!Number.isNaN(parsed.getTime())) {
+    return parsed.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
+  }
+
+  return period;
+}
+
+function shouldShowChartLabel(index: number, total: number) {
+  if (total <= 8) {
+    return true;
+  }
+
+  const step = Math.ceil(total / 8);
+  return index === 0 || index === total - 1 || index % step === 0;
 }
 
 function getInitials(value: string) {
@@ -189,6 +210,7 @@ export default function SubscriptionManagement({ searchTerm }: SubscriptionManag
     () => groupTimeSeries(analytics?.subscriptionGrowth ?? [], chartInterval),
     [analytics?.subscriptionGrowth, chartInterval]
   );
+  const hasChartValues = chartPoints.some(point => Number(point.count ?? 0) > 0);
   const maxChartValue = Math.max(...chartPoints.map(point => Number(point.count ?? 0)), 1);
 
   const refreshAfterMutation = async (updated?: SubscriptionRowDto) => {
@@ -340,9 +362,13 @@ export default function SubscriptionManagement({ searchTerm }: SubscriptionManag
             </div>
           </div>
           <div className="subscription-management__chart">
-            {chartPoints.length > 0 ? (
-              chartPoints.map(point => {
+            {chartPoints.length > 0 && hasChartValues ? (
+              chartPoints.map((point, index) => {
                 const value = Number(point.count ?? 0);
+                const barHeight =
+                  value > 0
+                    ? Math.max((value / maxChartValue) * CHART_BAR_MAX_HEIGHT, CHART_BAR_MIN_HEIGHT)
+                    : 0;
                 return (
                   <div className="subscription-management__chart-item" key={point.period}>
                     <span className="subscription-management__chart-tooltip">
@@ -350,13 +376,16 @@ export default function SubscriptionManagement({ searchTerm }: SubscriptionManag
                     </span>
                     <div
                       className="subscription-management__chart-bar"
-                      style={{ height: `${Math.max((value / maxChartValue) * 100, 8)}%` }}
+                      style={{ height: `${barHeight}px` }}
                     />
+                    <span className="subscription-management__chart-label">
+                      {shouldShowChartLabel(index, chartPoints.length) ? formatChartPeriodLabel(point.period) : ''}
+                    </span>
                   </div>
                 );
               })
             ) : (
-              <div className="subscription-management__chart-empty">Chưa có dữ liệu analytics</div>
+              <div className="subscription-management__chart-empty">Chưa có subscription mới trong kỳ này</div>
             )}
           </div>
         </div>

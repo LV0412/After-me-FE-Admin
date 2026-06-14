@@ -270,7 +270,6 @@ export default function UserManagement({ searchTerm = '', onUpdateUser }: UserMa
             <p>Tổng người dùng</p>
             <strong>{summary.totalUsers.toLocaleString('vi-VN')}</strong>
           </div>
-          <span className="user-management__metric-change user-management__metric-change--up">+12%</span>
         </article>
 
         <article className="user-management__metric-card">
@@ -281,7 +280,6 @@ export default function UserManagement({ searchTerm = '', onUpdateUser }: UserMa
             <p>Người dùng chờ duyệt</p>
             <strong>{summary.pendingUsers.toLocaleString('vi-VN')}</strong>
           </div>
-          <span className="user-management__metric-change user-management__metric-change--up">+5%</span>
         </article>
 
         <article className="user-management__metric-card">
@@ -292,7 +290,6 @@ export default function UserManagement({ searchTerm = '', onUpdateUser }: UserMa
             <p>Người dùng bị cấm</p>
             <strong>{summary.suspendedUsers.toLocaleString('vi-VN')}</strong>
           </div>
-          <span className="user-management__metric-change user-management__metric-change--down">-2%</span>
         </article>
       </section>
 

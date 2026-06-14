@@ -97,7 +97,7 @@ export default function Sidebar({ activeTab, setActiveTab, config, onExport, onL
           />
           <div className="overflow-hidden">
             <p className="sidebar__user-name">Admin User</p>
-            <p className="sidebar__user-role">Quản trị viên cấp cao</p>
+            <p className="sidebar__user-role">Quản trị viên</p>
           </div>
         </div>
 

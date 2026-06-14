@@ -260,6 +260,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
   margin-bottom: 24px;
 }
 
@@ -276,6 +277,28 @@
   background: #f1f5f9;
   padding: 4px 12px;
   border-radius: 9999px;
+}
+
+.dashboard-chart-card__summary {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.dashboard-chart-card__summary span {
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.dashboard-chart-card__summary strong {
+  color: #047857;
+  font-size: 14px;
+  font-weight: 900;
 }
 
 .dashboard-chart-card__legend {
@@ -685,6 +708,11 @@
   .dashboard-chart-card__legend {
     flex-wrap: wrap;
     gap: 10px;
+  }
+
+  .dashboard-chart-card__summary {
+    align-items: flex-start;
+    margin-left: 0;
   }
 
   .dashboard-bar-chart,

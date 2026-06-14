@@ -77,20 +77,6 @@
   font-weight: 950;
 }
 
-.user-management__metric-change {
-  margin-left: auto;
-  font-size: 1rem;
-  font-weight: 950;
-}
-
-.user-management__metric-change--up {
-  color: #00855f;
-}
-
-.user-management__metric-change--down {
-  color: #e11d2e;
-}
-
 .user-management__notice {
   border-radius: 18px;
   border: 1px solid;
