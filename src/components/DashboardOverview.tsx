@@ -64,9 +64,7 @@ function toDateInputValue(date: Date) {
 }
 
 function defaultFromDate() {
-  const date = new Date();
-  date.setDate(date.getDate() - 29);
-  return toDateInputValue(date);
+  return `${new Date().getFullYear()}-01-01`;
 }
 
 function formatMoney(value: number | undefined | null) {
@@ -83,6 +81,10 @@ function previousMetric(points: TimeSeriesPointDto[], key: 'count' | 'amount' | 
   }
 
   return Number(points[points.length - 2][key] ?? 0);
+}
+
+function hasUsablePreviousMetric(value: number | null) {
+  return value !== null && value > 0;
 }
 
 function periodLabel(interval: IntervalValue) {
@@ -240,7 +242,7 @@ function MetricCard({
   value: string;
   icon: React.ReactNode;
   tone?: 'default' | 'success' | 'danger';
-  comparison: string;
+  comparison?: string;
   action?: React.ReactNode;
 }) {
   return (
@@ -259,7 +261,7 @@ function MetricCard({
           >
             {value}
           </h3>
-          <p className="dashboard-card__comparison">{comparison}</p>
+          {comparison && <p className="dashboard-card__comparison">{comparison}</p>}
         </div>
         {icon}
       </div>
@@ -273,12 +275,16 @@ function TrendLineChart({
   points,
   metric,
   formatValue,
+  summaryLabel,
+  summaryValue,
   tone = 'default'
 }: {
   title: string;
   points: TimeSeriesPointDto[];
   metric: 'count' | 'amount' | 'rate';
   formatValue?: (value: number) => string;
+  summaryLabel?: string;
+  summaryValue?: string;
   tone?: 'default' | 'danger' | 'money';
 }) {
   const maxValue = maxMetric(points, metric);
@@ -308,11 +314,17 @@ function TrendLineChart({
     <div className="dashboard-card dashboard-chart-card">
       <div className="dashboard-chart-card__header">
         <h4 className="dashboard-chart-card__title">{title}</h4>
+        {summaryValue && (
+          <div className="dashboard-chart-card__summary">
+            <span>{summaryLabel ?? 'Tổng'}</span>
+            <strong>{summaryValue}</strong>
+          </div>
+        )}
       </div>
 
       <div className={`dashboard-line-chart dashboard-line-chart--${tone}`}>
         {points.length === 0 ? (
-          <div className="text-sm text-slate-400 font-semibold px-4 py-8">ChÆ°a cĂ³ dá»¯ liá»‡u</div>
+          <div className="text-sm text-slate-400 font-semibold px-4 py-8">Chưa có dữ liệu</div>
         ) : (
           <>
             <div className="dashboard-line-chart__y-axis" aria-hidden="true">
@@ -409,6 +421,10 @@ export default function DashboardOverview({
   );
   const churnTrendPoints = useMemo(() => groupTimeSeries(data.churnTrend, interval), [data.churnTrend, interval]);
   const revenueTrendPoints = useMemo(() => groupTimeSeries(data.revenueTrend, interval), [data.revenueTrend, interval]);
+  const revenueTrendTotal = useMemo(
+    () => revenueTrendPoints.reduce((sum, point) => sum + Number(point.amount ?? 0), 0),
+    [revenueTrendPoints]
+  );
   const comparisonPeriod = periodLabel(interval);
   const previousUsers = previousMetric(userGrowthPoints, 'count');
   const previousSubscriptions = previousMetric(subscriptionGrowthPoints, 'count');
@@ -468,9 +484,9 @@ export default function DashboardOverview({
           label="Tổng người dùng"
           value={cards.totalUsers.toLocaleString('vi-VN')}
           comparison={
-            previousUsers === null
-              ? 'Chưa có dữ liệu kỳ trước'
-              : `vs ${previousUsers.toLocaleString('vi-VN')} ${comparisonPeriod}`
+            hasUsablePreviousMetric(previousUsers)
+              ? `vs ${previousUsers.toLocaleString('vi-VN')} ${comparisonPeriod}`
+              : undefined
           }
           icon={<div className="dashboard-card__icon dashboard-card__icon--teal"><Users className="w-5 h-5 text-emerald-700" /></div>}
         />
@@ -491,9 +507,9 @@ export default function DashboardOverview({
           label="Gói đang hoạt động"
           value={cards.activeSubscriptions.toLocaleString('vi-VN')}
           comparison={
-            previousSubscriptions === null
-              ? 'Chưa có dữ liệu kỳ trước'
-              : `vs ${previousSubscriptions.toLocaleString('vi-VN')} ${comparisonPeriod}`
+            hasUsablePreviousMetric(previousSubscriptions)
+              ? `vs ${previousSubscriptions.toLocaleString('vi-VN')} ${comparisonPeriod}`
+              : undefined
           }
           icon={<div className="dashboard-card__icon dashboard-card__icon--emerald"><CheckCircle2 className="w-5 h-5 text-emerald-700" /></div>}
           action={<div className="dashboard-card__trend dashboard-card__trend--muted"><Calendar className="w-4 h-4 text-slate-400" /><span>Cập nhật từ subscription</span></div>}
@@ -502,9 +518,9 @@ export default function DashboardOverview({
           label="MRR"
           value={formatMoney(cards.mrr)}
           comparison={
-            previousRevenue === null
-              ? 'Chưa có dữ liệu doanh thu kỳ trước'
-              : `Doanh thu ${comparisonPeriod}: ${formatMoney(previousRevenue)}`
+            hasUsablePreviousMetric(previousRevenue)
+              ? `Doanh thu ${comparisonPeriod}: ${formatMoney(previousRevenue)}`
+              : undefined
           }
           icon={<div className="dashboard-card__icon dashboard-card__icon--teal"><Wallet className="w-5 h-5 text-teal-700" /></div>}
         />
@@ -513,9 +529,9 @@ export default function DashboardOverview({
           value={formatMoney(cards.revenueToday)}
           tone="success"
           comparison={
-            previousRevenue === null
-              ? 'Chưa có dữ liệu hôm qua'
-              : `vs ${formatMoney(previousRevenue)} ${comparisonPeriod}`
+            hasUsablePreviousMetric(previousRevenue)
+              ? `vs ${formatMoney(previousRevenue)} ${comparisonPeriod}`
+              : undefined
           }
           icon={<div className="dashboard-card__icon dashboard-card__icon--emerald"><TrendingUp className="w-5 h-5 text-emerald-700" /></div>}
         />
@@ -523,9 +539,9 @@ export default function DashboardOverview({
           label="Doanh thu tháng này"
           value={formatMoney(cards.revenueThisMonth)}
           comparison={
-            previousRevenue === null
-              ? 'Chưa có dữ liệu kỳ trước'
-              : `vs ${formatMoney(previousRevenue)} ${comparisonPeriod}`
+            hasUsablePreviousMetric(previousRevenue)
+              ? `vs ${formatMoney(previousRevenue)} ${comparisonPeriod}`
+              : undefined
           }
           icon={<div className="dashboard-card__icon dashboard-card__icon--emerald"><TrendingUp className="w-4 h-4 text-emerald-700" /></div>}
         />
@@ -549,7 +565,15 @@ export default function DashboardOverview({
         <TrendLineChart title="Tăng trưởng người dùng" points={userGrowthPoints} metric="count" />
         <TrendLineChart title="Tăng trưởng đăng ký" points={subscriptionGrowthPoints} metric="count" />
         <TrendLineChart title="Churn" points={churnTrendPoints} metric="count" tone="danger" />
-        <TrendLineChart title="Doanh thu theo kỳ" points={revenueTrendPoints} metric="amount" formatValue={formatMoney} tone="money" />
+        <TrendLineChart
+          title="Doanh thu theo kỳ"
+          points={revenueTrendPoints}
+          metric="amount"
+          formatValue={formatMoney}
+          summaryLabel="Tổng biểu đồ"
+          summaryValue={formatMoney(revenueTrendTotal)}
+          tone="money"
+        />
       </div>
 
       <div className="dashboard-card dashboard-activity-card">

@@ -105,6 +105,7 @@
   display: grid;
   grid-template-columns: repeat(1, minmax(0, 1fr));
   gap: 24px;
+  min-width: 0;
 }
 
 @media (min-width: 1024px) {
@@ -120,6 +121,8 @@
   padding: 24px;
   border-radius: 20px;
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+  min-width: 0;
+  overflow: hidden;
 }
 
 .finance-admin__revenue-card {
@@ -136,6 +139,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
   margin-bottom: 24px;
 }
 
@@ -164,15 +168,41 @@
   outline: 2px solid rgba(5, 150, 105, 0.2);
 }
 
+.finance-admin__chart-summary {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.finance-admin__chart-summary span {
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.finance-admin__chart-summary strong {
+  color: #002046;
+  font-size: 14px;
+  font-weight: 900;
+}
+
 .finance-admin__bar-chart {
   height: 256px;
   display: flex;
   align-items: end;
-  justify-content: space-between;
-  gap: 16px;
+  justify-content: flex-start;
+  gap: clamp(8px, 1.2vw, 16px);
   padding: 40px 8px 0;
   border-bottom: 1px solid #f1f5f9;
   position: relative;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-gutter: stable;
 }
 
 .finance-admin__chart-unit {
@@ -188,8 +218,8 @@
 }
 
 .finance-admin__bar-chart-item {
-  flex-grow: 1;
-  min-width: 12px;
+  flex: 0 0 clamp(14px, 2.2vw, 28px);
+  min-width: 14px;
   display: flex;
   flex-direction: column;
   justify-content: end;
@@ -1020,6 +1050,11 @@
   .finance-admin__table-head {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .finance-admin__chart-summary {
+    align-items: flex-start;
+    margin-left: 0;
   }
 
   .finance-admin__bar-chart {

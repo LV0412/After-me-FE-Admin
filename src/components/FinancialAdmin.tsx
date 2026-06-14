@@ -35,7 +35,7 @@ interface FinancialAdminProps {
   onUpdateTransactionStatus?: (id: string, status: unknown) => void;
 }
 
-const statusOptions = ['All', 'SUCCESS', 'FAILED', 'PENDING', 'REFUNDED'];
+const statusOptions = ['All', 'SUCCESS', 'PENDING', 'FAILED', 'REFUNDED'];
 
 const emptyFinanceSummary: FinanceSummaryDto = {
   revenueToday: 0,
@@ -79,6 +79,18 @@ function formatDate(value: string | null | undefined, includeTime = false) {
   return includeTime ? parsed.toLocaleString('vi-VN') : parsed.toLocaleDateString('vi-VN');
 }
 
+function toDateQueryValue(date: Date) {
+  return date.toISOString().slice(0, 10);
+}
+
+function getCurrentYearRange() {
+  const today = new Date();
+  return {
+    from: `${today.getFullYear()}-01-01`,
+    to: toDateQueryValue(today)
+  };
+}
+
 function getInitials(value: string) {
   const source = value.includes('@') ? value.split('@')[0] : value;
   return source
@@ -92,7 +104,7 @@ function getInitials(value: string) {
 
 function getStatusLabel(status: string) {
   const normalized = status.toUpperCase();
-  if (normalized === 'SUCCESS') return 'Thành công';
+  if (normalized === 'SUCCESS' || normalized === 'COMPLETED') return 'Thành công';
   if (normalized === 'FAILED') return 'Thất bại';
   if (normalized === 'PENDING') return 'Đang chờ';
   if (normalized === 'REFUNDED') return 'Hoàn tiền';
@@ -101,7 +113,7 @@ function getStatusLabel(status: string) {
 
 function getStatusClass(status: string) {
   const normalized = status.toUpperCase();
-  if (normalized === 'SUCCESS') return 'finance-admin__status-pill--success';
+  if (normalized === 'SUCCESS' || normalized === 'COMPLETED') return 'finance-admin__status-pill--success';
   if (normalized === 'FAILED') return 'finance-admin__status-pill--danger';
   if (normalized === 'REFUNDED') return 'finance-admin__status-pill--neutral';
   return 'finance-admin__status-pill--pending';
@@ -152,7 +164,7 @@ export default function FinancialAdmin({ searchTerm }: FinancialAdminProps) {
     try {
       const [summaryResponse, timeseriesResponse, byPlanResponse, listResponse, transactionSummaryResponse] = await Promise.all([
         getFinanceSummary(),
-        getFinanceRevenueTimeseries({ interval: chartInterval }),
+        getFinanceRevenueTimeseries({ interval: chartInterval, ...getCurrentYearRange() }),
         getFinanceRevenueByPlan(),
         getFinanceTransactions({
           page,
@@ -200,6 +212,10 @@ export default function FinancialAdmin({ searchTerm }: FinancialAdminProps) {
     [revenueTimeseries, chartInterval]
   );
   const maxRevenue = Math.max(...revenueChartPoints.map(point => Number(point.amount ?? 0)), 1);
+  const chartTotal = useMemo(
+    () => revenueChartPoints.reduce((sum, point) => sum + Number(point.amount ?? 0), 0),
+    [revenueChartPoints]
+  );
   const planTotal = useMemo(
     () => revenueByPlan.reduce((sum, plan) => sum + Number(plan.revenue ?? 0), 0),
     [revenueByPlan]
@@ -282,7 +298,11 @@ export default function FinancialAdmin({ searchTerm }: FinancialAdminProps) {
           <div className="finance-admin__card-head">
             <div>
               <h3 className="finance-admin__card-title">Timeseries doanh thu</h3>
-              <p className="finance-admin__card-subtitle">Dữ liệu từ `/finance/revenue/timeseries`</p>
+              <p className="finance-admin__card-subtitle">Doanh thu thực thu từ đầu năm đến hôm nay</p>
+            </div>
+            <div className="finance-admin__chart-summary">
+              <span>Tổng biểu đồ</span>
+              <strong>{formatMoney(chartTotal)}</strong>
             </div>
             <select className="finance-admin__select" value={chartInterval} onChange={event => setChartInterval(event.target.value as IntervalValue)}>
               {intervalOptions.map(option => (

@@ -39,6 +39,9 @@ interface ReminderTrackingProps {
 }
 
 const statusOptions = ['All', 'ACTIVE', 'PAUSED', 'ARCHIVED'];
+const CHART_BAR_MAX_HEIGHT = 92;
+const CHART_BAR_MIN_HEIGHT = 10;
+const EMPTY_CHART_POINT_COUNT = 7;
 
 const emptySummary: ReminderSummaryDto = {
   totalReminders: 0,
@@ -63,6 +66,51 @@ function formatNumber(value: number | null | undefined) {
 
 function formatPercent(value: number | null | undefined) {
   return `${new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 2 }).format(Number(value ?? 0))}%`;
+}
+
+function formatChartLabel(period: string) {
+  const parsed = new Date(period);
+
+  if (!Number.isNaN(parsed.getTime())) {
+    return parsed.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
+  }
+
+  return period;
+}
+
+function shouldShowChartLabel(index: number, total: number) {
+  if (total <= 8) {
+    return true;
+  }
+
+  const step = Math.ceil(total / 8);
+  return index === 0 || index === total - 1 || index % step === 0;
+}
+
+function buildEmptyChartPoints(interval: IntervalValue): TimeSeriesPointDto[] {
+  const today = new Date();
+
+  return Array.from({ length: EMPTY_CHART_POINT_COUNT }, (_, index) => {
+    const offset = EMPTY_CHART_POINT_COUNT - 1 - index;
+    const date = new Date(today);
+
+    if (interval === 'WEEK') {
+      date.setDate(today.getDate() - offset * 7);
+    } else if (interval === 'MONTH') {
+      date.setMonth(today.getMonth() - offset);
+    } else if (interval === 'QUARTER') {
+      date.setMonth(today.getMonth() - offset * 3);
+    } else if (interval === 'YEAR') {
+      date.setFullYear(today.getFullYear() - offset);
+    } else {
+      date.setDate(today.getDate() - offset);
+    }
+
+    return {
+      period: interval === 'YEAR' ? String(date.getFullYear()) : date.toISOString().slice(0, 10),
+      count: 0
+    };
+  });
 }
 
 function formatDate(value: string | null | undefined, includeTime = false) {
@@ -168,7 +216,12 @@ export default function ReminderTracking({ searchTerm }: ReminderTrackingProps) 
   }, [searchTerm, statusFilter]);
 
   const chartPoints = useMemo(() => groupTimeSeries(timeseries, chartInterval), [timeseries, chartInterval]);
-  const maxChartValue = Math.max(...chartPoints.map(point => Number(point.count ?? 0)), 1);
+  const displayChartPoints = useMemo(
+    () => (chartPoints.length > 0 ? chartPoints : buildEmptyChartPoints(chartInterval)),
+    [chartPoints, chartInterval]
+  );
+  const hasChartValues = displayChartPoints.some(point => Number(point.count ?? 0) > 0);
+  const maxChartValue = Math.max(...displayChartPoints.map(point => Number(point.count ?? 0)), 1);
 
   const visibleRows = useMemo(() => rows, [rows]);
 
@@ -277,24 +330,36 @@ export default function ReminderTracking({ searchTerm }: ReminderTrackingProps) 
             </div>
           </div>
           <div className="reminder-tracking__chart">
-            {chartPoints.length > 0 ? (
-              chartPoints.map(point => {
-                const value = Number(point.count ?? 0);
-                return (
-                  <div className="reminder-tracking__chart-item" key={point.period}>
-                    <span className="reminder-tracking__chart-tooltip">
-                      {point.period}: {formatNumber(value)}
-                    </span>
-                    <div
-                      className="reminder-tracking__chart-bar"
-                      style={{ height: `${Math.max((value / maxChartValue) * 100, 8)}%` }}
-                    />
-                  </div>
-                );
-              })
-            ) : (
-              <div className="reminder-tracking__chart-empty">Chưa có dữ liệu timeseries</div>
-            )}
+            <div className="reminder-tracking__chart-body">
+              <div className="reminder-tracking__chart-plot">
+                {displayChartPoints.map(point => {
+                  const value = Number(point.count ?? 0);
+                  const barHeight =
+                    value > 0
+                      ? Math.max((value / maxChartValue) * CHART_BAR_MAX_HEIGHT, CHART_BAR_MIN_HEIGHT)
+                      : 0;
+                  return (
+                    <div className="reminder-tracking__chart-item" key={point.period}>
+                      <span className="reminder-tracking__chart-tooltip">
+                        {point.period}: {formatNumber(value)}
+                      </span>
+                      <div
+                        className="reminder-tracking__chart-bar"
+                        style={{ height: `${barHeight}px` }}
+                      />
+                    </div>
+                  );
+                })}
+                {!hasChartValues && <div className="reminder-tracking__chart-empty">Chưa có reminder mới trong kỳ này</div>}
+              </div>
+              <div className="reminder-tracking__chart-x-axis">
+                {displayChartPoints.map((point, index) => (
+                  <span key={point.period}>
+                    {shouldShowChartLabel(index, displayChartPoints.length) ? formatChartLabel(point.period) : ''}
+                  </span>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 
